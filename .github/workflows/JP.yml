@@ -51,11 +51,20 @@ jobs:
           # 4. 生成 domain/ALL8443.txt (過濾 8443 端口)
           grep ":8443#" domain/ALL.txt | sort -u > domain/ALL8443.txt
 
-          # 5. 生成 domain/JP443.txt (過濾 JP 地區 + 443 端口，僅輸出純 IP)
-          grep -i "#JP" domain/ALL443.txt | cut -d':' -f1 | sort -u > domain/JP443.txt
+          # 5. 生成各個指定地區的純 IP 檔案 (443 與 8443)
+          echo "正在分類並提取各地區純 IP..."
+          REGIONS=("JP" "HK" "US" "SG" "MY" "NL")
+          
+          for region in "${REGIONS[@]}"; do
+            # 處理 443 端口：從 ALL443.txt 篩選地區，裁切出純 IP，去重後輸出
+            grep -i "#${region}" domain/ALL443.txt | cut -d':' -f1 | sort -u > "domain/${region}443.txt"
+            
+            # 處理 8443 端口：從 ALL8443.txt 篩選地區，裁切出純 IP，去重後輸出
+            grep -i "#${region}" domain/ALL8443.txt | cut -d':' -f1 | sort -u > "domain/${region}8443.txt"
+          done
 
           # 6. 檢查是否有任何檔案變動
-          # 使用 git status 檢查 domain 目錄
+          # 使用 git status 檢查 domain 目錄下的所有 txt 檔案
           git add domain/*.txt
           if [ -n "$(git status --porcelain domain/)" ]; then
             echo "偵測到檔案變更"
@@ -70,6 +79,6 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -m "Auto Update IPs: ALL, 443, 8443, JP443 ($(date -d '+8 hours' '+%Y-%m-%d %H:%M'))"
+          git commit -m "Auto Update IPs: ALL, 443, 8443 & Regions (JP, HK, US, SG, MY, NL) ($(date -d '+8 hours' '+%Y-%m-%d %H:%M'))"
           git pull --rebase origin main
           git push origin main
