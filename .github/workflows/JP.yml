@@ -53,7 +53,7 @@ jobs:
 
           # 5. 生成各個指定地區的純 IP 檔案 (443 與 8443)
           echo "正在分類並提取各地區純 IP..."
-          REGIONS=("JP" "HK" "US" "SG" "MY" "NL")
+          REGIONS=("JP" "HK" "US" "SG" "MY" "NL" "KR")
           
           for region in "${REGIONS[@]}"; do
             # 處理 443 端口：從 ALL443.txt 篩選地區，裁切出純 IP，去重後輸出
